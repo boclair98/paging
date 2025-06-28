@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Logs</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+        th { background-color: #f4f4f4; }
+        .pagination { margin-top: 20px; }
+        .pagination a, .pagination span {
+            margin: 0 5px;
+            padding: 5px 10px;
+            border: 1px solid #ccc;
+            text-decoration: none;
+            color: black;
+        }
+        .pagination .current {
+            font-weight: bold;
+            background-color: #eee;
+        }
+
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<h2>Log Entries</h2>
+
+<form method="get" action="/api/logs/view">
+    <label>
+        <input type="radio" name="sortBy" value="userId"
+               th:checked="${sortBy == 'userId'}"
+               onchange="this.form.submit()"> 사용자
+    </label>
+    <label>
+        <input type="radio" name="sortBy" value="level"
+               th:checked="${sortBy == 'level'}"
+               onchange="this.form.submit()"> 레벨
+    </label>
+    <label>
+        <input type="radio" name="sortBy" value="timestamp"
+               th:checked="${sortBy == 'timestamp'}"
+               onchange="this.form.submit()"> 시간
+    </label>
+
+    <input type="text" name="searchTerm" placeholder="검색어 입력"
+           th:value="${searchTerm != null ? searchTerm : ''}">
+    <button type="submit">검색</button>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Timestamp</th>
+        <th>Level</th>
+        <th>Service</th>
+        <th>Message</th>
+        <th>User ID</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="log : ${logs}"
+        th:classappend="${highlightIds != null and highlightIds.contains(log.id)} ? 'highlight' : ''">
+        <td th:text="${log.id}"></td>
+        <td th:text="${log.timestamp}"></td>
+        <td th:text="${log.level}"></td>
+        <td th:text="${log.service}"></td>
+        <td th:text="${log.message}"></td>
+        <td th:text="${log.userId}"></td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="pagination">
+    <a th:if="${currentPage > 0}"
+       th:href="@{/api/logs/view(sortBy=${sortBy}, searchTerm=${searchTerm}, page=${currentPage - 1}, size=${pageSize})}">이전</a>
+
+    <span class="current" th:text="${currentPage + 1}"></span> / <span th:text="${totalPages}"></span>
+
+    <a th:if="${currentPage + 1 < totalPages}"
+       th:href="@{/api/logs/view(sortBy=${sortBy}, searchTerm=${searchTerm}, page=${currentPage + 1}, size=${pageSize})}">다음</a>
+</div>
+
+</body>
+</html>
